@@ -1,6 +1,12 @@
-import { View, Image, useWindowDimensions } from "react-native";
+import {
+  View,
+  Image,
+  useWindowDimensions,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
+import { useRef, useState } from "react";
 import { ThemedText } from "@/components/ThemedText";
-import { Focusable } from "@/components/Focusable";
 import { Album, fetchAlbums, getCoverArtUrl } from "@/services/navidrome";
 import { useRouter } from "expo-router";
 import tw from "twrnc";
@@ -16,35 +22,76 @@ function AlbumGridItem({
 }) {
   const coverUrl = getCoverArtUrl(item.coverArt || item.id, 400);
   const router = useRouter();
+  const [focused, setFocused] = useState(false);
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handleFocus = () => {
+    setFocused(true);
+    Animated.spring(scale, {
+      toValue: 1.06,
+      friction: 6,
+      tension: 150,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 6,
+      tension: 150,
+      useNativeDriver: true,
+    }).start();
+  };
 
   return (
-    <Focusable
+    <TouchableOpacity
       onPress={() =>
         router.push({ pathname: "/album/[id]", params: { id: item.id } })
       }
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      activeOpacity={0.9}
       style={tw`p-3`}
-      focusScale={1.08}
-      rounded={false}
     >
-      <Image
-        source={{ uri: coverUrl }}
+      <Animated.View
         style={[
           tw`rounded-lg mb-2`,
-          { width: itemWidth, height: itemWidth, backgroundColor: "#282828" },
+          {
+            width: itemWidth,
+            height: itemWidth,
+            transform: [{ scale }],
+            shadowColor: focused ? "rgba(255,255,255,0.2)" : "transparent",
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: focused ? 0.6 : 0,
+            shadowRadius: 16,
+          },
         ]}
-      />
+      >
+        <Image
+          source={{ uri: coverUrl }}
+          style={[
+            tw`rounded-lg`,
+            { width: itemWidth, height: itemWidth, backgroundColor: "#282828" },
+          ]}
+        />
+      </Animated.View>
       <View style={{ width: itemWidth }}>
         <ThemedText
-          style={tw`text-lg text-white font-semibold`}
+          style={tw`text-lg font-semibold ${focused ? "text-[#1DB954]" : "text-white"}`}
           numberOfLines={1}
         >
           {item.name}
         </ThemedText>
-        <ThemedText style={tw`text-base text-neutral-400`} numberOfLines={1}>
+        <ThemedText
+          style={tw`text-base ${focused ? "text-[#1DB954]" : "text-neutral-400"}`}
+          numberOfLines={1}
+        >
           {item.artist}
         </ThemedText>
       </View>
-    </Focusable>
+    </TouchableOpacity>
   );
 }
 
@@ -53,10 +100,11 @@ export default function AlbumsScreen() {
   const { data: albums } = useSuspenseQuery({
     queryKey: ["getAlbums"],
     queryFn: () => fetchAlbums("newest", 50),
+    select: (data) =>
+      [...data].sort((a, b) => a.artist.localeCompare(b.artist)),
   });
 
-  const numColumns =
-    width > 1200 ? 6 : width > 900 ? 5 : width > 600 ? 4 : 2;
+  const numColumns = width > 1200 ? 6 : width > 900 ? 5 : width > 600 ? 4 : 2;
   const itemWidth = (width - (numColumns + 1) * 26) / numColumns;
 
   return (
