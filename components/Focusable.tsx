@@ -15,6 +15,7 @@ interface FocusableProps {
   focusScale?: number;
   glowColor?: string;
   rounded?: boolean;
+  disabled?: boolean;
 }
 
 export function Focusable({
@@ -25,11 +26,13 @@ export function Focusable({
   focusScale = 1.1,
   glowColor = "#1DB954",
   rounded = true,
+  disabled = false,
 }: FocusableProps) {
   const scale = useRef(new Animated.Value(1)).current;
   const glowOpacity = useRef(new Animated.Value(0)).current;
 
   const handleFocus = () => {
+    if (disabled) return;
     Animated.parallel([
       Animated.spring(scale, {
         toValue: focusScale,
@@ -65,16 +68,17 @@ export function Focusable({
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      activeOpacity={0.8}
+      activeOpacity={disabled ? 1 : 0.8}
       hasTVPreferredFocus={hasTVPreferredFocus}
+      disabled={disabled}
     >
       <Animated.View
         style={[
           tw`items-center justify-center ${borderRadius}`,
-          { transform: [{ scale }] },
+          { transform: [{ scale }], opacity: disabled ? 0.3 : 1 },
           style,
         ]}
       >

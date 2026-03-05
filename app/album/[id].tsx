@@ -52,19 +52,28 @@ function TrackItem({
 export default function AlbumDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { play, currentSong } = useAudio();
+  const { playQueue, currentSong } = useAudio();
   const { data: album } = useSuspenseQuery({
     queryKey: ["getAlbum", id],
     queryFn: () => getAlbum(id),
   });
 
-  const handlePlaySong = (song: Song) => {
-    play(song);
+  const handlePlaySong = (song: Song, index: number) => {
+    if (album) {
+      playQueue(album.song, index);
+    }
   };
 
   const handlePlayAlbum = () => {
     if (album && album.song.length > 0) {
-      handlePlaySong(album.song[0]);
+      playQueue(album.song, 0);
+    }
+  };
+
+  const handleShuffleAlbum = () => {
+    if (album && album.song.length > 0) {
+      const shuffled = [...album.song].sort(() => Math.random() - 0.5);
+      playQueue(shuffled, 0);
     }
   };
 
@@ -118,7 +127,7 @@ export default function AlbumDetailScreen() {
             </ThemedText>
           </Focusable>
           <Focusable
-            onPress={() => {}}
+            onPress={handleShuffleAlbum}
             style={tw`flex-row bg-[#282828] py-3 px-8 items-center gap-2`}
             focusScale={1.1}
           >
@@ -131,12 +140,12 @@ export default function AlbumDetailScreen() {
       </View>
 
       <ScrollView style={tw`flex-1`} contentContainerStyle={tw`py-16 pr-10`}>
-        {album.song.map((song) => (
+        {album.song.map((song, index) => (
           <TrackItem
             key={song.id}
             song={song}
             isActive={currentSong?.id === song.id}
-            onPress={() => handlePlaySong(song)}
+            onPress={() => handlePlaySong(song, index)}
           />
         ))}
       </ScrollView>

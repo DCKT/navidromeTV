@@ -13,8 +13,18 @@ import tw from "twrnc";
 import { useAudio } from "@/context/AudioContext";
 
 export function AudioPlayer() {
-  const { currentSong, playerState, setPlayerState, pause, resume, stop } =
-    useAudio();
+  const {
+    currentSong,
+    playerState,
+    setPlayerState,
+    pause,
+    resume,
+    stop,
+    next,
+    previous,
+    hasPrevious,
+    hasNext,
+  } = useAudio();
   const [source, setSource] = useState<AudioSource | null>(null);
   const player = useAudioPlayer(source);
   const status = useAudioPlayerStatus(player);
@@ -44,9 +54,13 @@ export function AudioPlayer() {
   useEffect(() => {
     if (!player) return;
     if (status.didJustFinish) {
-      setPlayerState("stopped");
+      if (hasNext) {
+        next();
+      } else {
+        setPlayerState("stopped");
+      }
     }
-  }, [status.didJustFinish, setPlayerState]);
+  }, [status.didJustFinish, hasNext, next, setPlayerState]);
 
   if (!currentSong) return null;
 
@@ -119,9 +133,18 @@ export function AudioPlayer() {
       </View>
 
       {/* Controls */}
-      <View style={tw`flex-row items-center gap-12 mt-6`}>
+      <View style={tw`flex-row items-center gap-8 mt-6`}>
         <Focusable onPress={stop} style={tw`p-4`} focusScale={1.2}>
           <Ionicons name="close-circle" size={44} color="#B3B3B3" />
+        </Focusable>
+
+        <Focusable
+          onPress={previous}
+          style={tw`p-3`}
+          focusScale={1.2}
+          disabled={!hasPrevious}
+        >
+          <Ionicons name="play-skip-back" size={36} color="white" />
         </Focusable>
 
         <Focusable
@@ -135,6 +158,15 @@ export function AudioPlayer() {
             size={80}
             color="#1DB954"
           />
+        </Focusable>
+
+        <Focusable
+          onPress={next}
+          style={tw`p-3`}
+          focusScale={1.2}
+          disabled={!hasNext}
+        >
+          <Ionicons name="play-skip-forward" size={36} color="white" />
         </Focusable>
       </View>
     </View>
