@@ -2,6 +2,7 @@ import {
   View,
   ActivityIndicator,
   Image,
+  BackHandler,
 } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { Focusable } from "./Focusable";
@@ -29,6 +30,18 @@ export function AudioPlayer() {
   const [source, setSource] = useState<AudioSource | null>(null);
   const player = useAudioPlayer(source);
   const status = useAudioPlayerStatus(player);
+
+  // Handle back/menu button on TV remote
+  useEffect(() => {
+    if (!currentSong) return;
+
+    const handler = BackHandler.addEventListener("hardwareBackPress", () => {
+      stop();
+      return true;
+    });
+
+    return () => handler.remove();
+  }, [currentSong, stop]);
 
   useEffect(() => {
     if (currentSong) {
