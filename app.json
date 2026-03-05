@@ -42,11 +42,6 @@
       },
       "bundleIdentifier": "com.dckthomas.navidromeTV"
     },
-    "web": {
-      "bundler": "metro",
-      "favicon": "./assets/images/favicon.png",
-      "output": "static"
-    },
     "experiments": {
       "typedRoutes": true
     },
