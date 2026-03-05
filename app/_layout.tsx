@@ -1,8 +1,4 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,25 +9,33 @@ import {
 } from "react-native-reanimated";
 import { AudioProvider } from "@/context/AudioContext";
 import { AudioPlayer } from "@/components/AudioPlayer";
-import { View, StyleSheet, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import tw from "twrnc";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-// Disable reanimated warnings
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
   strict: false,
 });
 
+const spotifyDarkTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: "#1DB954",
+    background: "#121212",
+    card: "#121212",
+    text: "#FFFFFF",
+    border: "#282828",
+    notification: "#1DB954",
+  },
+};
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -51,14 +55,14 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={spotifyDarkTheme}>
         <AudioProvider>
-          <View style={tw`flex-1 flex-row bg-slate-900`}>
+          <View style={tw`flex-1 bg-[#121212]`}>
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="album/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
-
             <AudioPlayer />
           </View>
         </AudioProvider>

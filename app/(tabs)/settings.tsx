@@ -1,21 +1,14 @@
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, TextInput, ScrollView } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
+import { Focusable } from "@/components/Focusable";
 import { useState, useEffect } from "react";
 import { navidrome } from "@/services/navidrome";
-import { useRouter } from "expo-router";
 import tw from "twrnc";
 
 export default function SettingsScreen() {
   const [url, setUrl] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -24,97 +17,69 @@ export default function SettingsScreen() {
       setUsername(config.username);
       setPassword(config.password || "");
     } catch (e) {
-      // Not initialized or no config
+      // Not initialized
     }
   }, []);
 
   const handleSave = () => {
-    navidrome.setConfig({
-      url,
-      username,
-      password,
-    });
+    navidrome.setConfig({ url, username, password });
     alert("Configuration saved!");
-    // Ideally we would persist this to Async Storage
   };
 
   return (
-    <ScrollView contentContainerStyle={tw`pt-36 items-center`}>
-      <View style={styles.form}>
-        <ThemedText style={styles.label}>Navidrome URL</ThemedText>
+    <ScrollView
+      style={tw`flex-1 bg-[#121212]`}
+      contentContainerStyle={tw`pt-36 items-center px-12`}
+    >
+      <ThemedText
+        style={tw`text-4xl font-extrabold text-white mb-8 self-start`}
+      >
+        Settings
+      </ThemedText>
+
+      <View style={tw`max-w-[600px] w-full`}>
+        <ThemedText style={tw`text-xl text-neutral-400 mb-2`}>
+          Navidrome URL
+        </ThemedText>
         <TextInput
-          style={styles.input}
+          style={tw`bg-[#282828] text-white p-4 rounded-lg mb-5 text-lg border border-[#333]`}
           value={url}
           onChangeText={setUrl}
           placeholder="http://192.168.1.10:4533"
-          placeholderTextColor="#666"
+          placeholderTextColor="#6A6A6A"
         />
 
-        <ThemedText style={styles.label}>Username</ThemedText>
+        <ThemedText style={tw`text-xl text-neutral-400 mb-2`}>
+          Username
+        </ThemedText>
         <TextInput
-          style={styles.input}
+          style={tw`bg-[#282828] text-white p-4 rounded-lg mb-5 text-lg border border-[#333]`}
           value={username}
           onChangeText={setUsername}
-          placeholderTextColor="#666"
+          placeholderTextColor="#6A6A6A"
         />
 
-        <ThemedText style={styles.label}>Password</ThemedText>
+        <ThemedText style={tw`text-xl text-neutral-400 mb-2`}>
+          Password
+        </ThemedText>
         <TextInput
-          style={styles.input}
+          style={tw`bg-[#282828] text-white p-4 rounded-lg mb-5 text-lg border border-[#333]`}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          placeholderTextColor="#666"
+          placeholderTextColor="#6A6A6A"
         />
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <ThemedText style={styles.saveButtonText}>
+        <Focusable
+          onPress={handleSave}
+          style={tw`bg-[#1DB954] py-4 items-center mt-4`}
+          focusScale={1.05}
+        >
+          <ThemedText style={tw`text-black text-xl font-bold`}>
             Save Configuration
           </ThemedText>
-        </TouchableOpacity>
+        </Focusable>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#151515",
-    padding: 40,
-  },
-  header: {
-    marginBottom: 40,
-  },
-  form: {
-    maxWidth: 600,
-    width: "100%",
-  },
-  label: {
-    fontSize: 32,
-    marginBottom: 8,
-    color: "#ccc",
-  },
-  input: {
-    backgroundColor: "#252525",
-    color: "white",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#333",
-  },
-  saveButton: {
-    backgroundColor: "#A1CEDC",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: "black",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});

@@ -1,16 +1,14 @@
 import {
-  Image,
-  StyleSheet,
+  View,
+  ScrollView,
+  FlatList,
   ActivityIndicator,
-  TouchableOpacity,
 } from "react-native";
-import { useState, useEffect } from "react";
-import { fetchAlbums, Album, getAlbum, navidrome } from "@/services/navidrome";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { useScale } from "@/hooks/useScale";
-import { useAudio } from "@/context/AudioContext";
+import { AlbumCard } from "@/components/AlbumCard";
+import { fetchAlbums, Album, navidrome } from "@/services/navidrome";
+import { useQuery } from "@tanstack/react-query";
+import tw from "twrnc";
 
 const NAVIDROME_URL = process.env.EXPO_PUBLIC_NAVIDROME_URL!;
 const USERNAME = process.env.EXPO_PUBLIC_USERNAME!;
@@ -22,115 +20,88 @@ navidrome.setConfig({
   password: PASSWORD,
 });
 
-export default function HomeScreen() {
-  const styles = useHomeScreenStyles();
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { play } = useAudio();
+const CARD_WIDTH = 200;
 
-  useEffect(() => {
-    const loadAlbums = async () => {
-      try {
-        const fetchedAlbums = await fetchAlbums();
-        setAlbums(fetchedAlbums);
-      } catch (e) {
-        setError("Erreur: " + (e instanceof Error ? e.message : String(e)));
-      } finally {
-        setLoading(false);
-      }
-    };
+function AlbumRow({ title, queryKey, type, size }: {
+  title: string;
+  queryKey: string;
+  type: string;
+  size: number;
+}) {
+  const { data: albums, isLoading } = useQuery({
+    queryKey: [queryKey],
+    queryFn: () => fetchAlbums(type, size),
+  });
 
-    loadAlbums();
-  }, []);
+  if (isLoading) {
+    return (
+      <View style={tw`mb-8`}>
+        <ThemedText style={tw`text-2xl font-bold text-white mb-4 px-12`}>
+          {title}
+        </ThemedText>
+        <ActivityIndicator color="#1DB954" style={tw`py-8`} />
+      </View>
+    );
+  }
 
-  const handlePlayAlbum = async (albumId: string) => {
-    try {
-      // Pour l'exemple, on charge l'album et on joue la première chanson
-      const albumDetails = await getAlbum(albumId);
-      if (albumDetails.song && albumDetails.song.length > 0) {
-        play(albumDetails.song[0]);
-      } else {
-        alert("Aucune chanson dans cet album");
-      }
-    } catch (e) {
-      alert("Erreur lors du chargement de l'album:" + e);
-    }
-  };
+  if (!albums || albums.length === 0) return null;
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Navidrome API Demo</ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Albums Récents</ThemedText>
-
-        {loading && <ActivityIndicator size="large" />}
-
-        {error && (
-          <ThemedText style={{ color: "red" }}>
-            {error}
-            {"\n"}
-            (Vérifiez NAVIDROME_URL, USERNAME, et PASSWORD dans index.tsx)
-          </ThemedText>
+    <View style={tw`mb-8`}>
+      <ThemedText style={tw`text-2xl font-bold text-white mb-4 px-12`}>
+        {title}
+      </ThemedText>
+      <FlatList
+        horizontal
+        data={albums}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <AlbumCard album={item} width={CARD_WIDTH} />
         )}
-
-        {!loading &&
-          !error &&
-          albums.map((album) => (
-            <TouchableOpacity
-              key={album.id}
-              onPress={() => handlePlayAlbum(album.id)}
-            >
-              <ThemedView
-                style={{
-                  marginBottom: 10,
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <ThemedText type="defaultSemiBold">{album.name}</ThemedText>
-                <ThemedText> - {album.artist}</ThemedText>
-              </ThemedView>
-            </TouchableOpacity>
-          ))}
-
-        {!loading && !error && albums.length === 0 && (
-          <ThemedText>Aucun album trouvé.</ThemedText>
-        )}
-      </ThemedView>
-    </ParallaxScrollView>
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={tw`px-12`}
+      />
+    </View>
   );
 }
 
-const useHomeScreenStyles = function () {
-  const scale = useScale();
-  return StyleSheet.create({
-    titleContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8 * scale,
-    },
-    stepContainer: {
-      gap: 8 * scale,
-      marginBottom: 8 * scale,
-    },
-    reactLogo: {
-      height: 178 * scale,
-      width: 290 * scale,
-      bottom: 0,
-      left: 0,
-      position: "absolute",
-    },
-  });
-};
+export default function HomeScreen() {
+  return (
+    <ScrollView
+      style={tw`flex-1 bg-[#121212]`}
+      contentContainerStyle={tw`pt-36 pb-32`}
+    >
+      <ThemedText style={tw`text-5xl font-extrabold text-white mb-8 px-12`}>
+        Good evening
+      </ThemedText>
+
+      <AlbumRow
+        title="Recently Added"
+        queryKey="recentAlbums"
+        type="newest"
+        size={20}
+      />
+
+      <AlbumRow
+        title="Recently Played"
+        queryKey="recentlyPlayed"
+        type="recent"
+        size={20}
+      />
+
+      <AlbumRow
+        title="Most Played"
+        queryKey="frequentAlbums"
+        type="frequent"
+        size={20}
+      />
+
+      <AlbumRow
+        title="Random Mix"
+        queryKey="randomAlbums"
+        type="random"
+        size={20}
+      />
+    </ScrollView>
+  );
+}

@@ -1,15 +1,10 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, Pressable } from 'react-native';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { SpotifyColors } from '@/constants/Colors';
 import { useTextStyles } from '@/hooks/useTextStyles';
 
-/**
- * This layout is required for the web platform.
- */
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const textStyles = useTextStyles();
 
   const tabBarButton = (props: any) => {
@@ -30,10 +25,13 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarActiveBackgroundColor: Colors[colorScheme ?? 'light'].background,
+        tabBarActiveTintColor: SpotifyColors.green,
+        tabBarInactiveTintColor: SpotifyColors.textSecondary,
+        tabBarActiveBackgroundColor: SpotifyColors.darkBase,
         tabBarStyle: {
           width: '100%',
+          backgroundColor: SpotifyColors.darkBase,
+          borderBottomColor: SpotifyColors.darkHighlight,
         },
         tabBarPosition: 'top',
         tabBarIconStyle: {
@@ -53,18 +51,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarButton,
-          tabBarLabelStyle: textStyles.default,
-          tabBarIcon: () => null,
-        }}
-      />
-      <Tabs.Screen
         name="albums"
         options={{
-          title: 'Albums',
+          title: 'Library',
           tabBarButton,
           tabBarLabelStyle: textStyles.default,
           tabBarIcon: () => null,
@@ -80,12 +69,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="explore"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
         name="tv_focus"
         options={
           Platform.OS === 'web'
-            ? {
-              href: null,
-            }
+            ? { href: null }
             : {
               title: 'TV demo',
               tabBarButton,

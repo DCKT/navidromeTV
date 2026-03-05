@@ -1,10 +1,19 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+export const SpotifyColors = {
+  green: '#1DB954',
+  greenDark: '#1AA34A',
+  black: '#000000',
+  darkBase: '#121212',
+  darkSurface: '#181818',
+  darkElevated: '#282828',
+  darkHighlight: '#333333',
+  white: '#FFFFFF',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#B3B3B3',
+  textSubdued: '#6A6A6A',
+};
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#aaa';
+const tintColorLight = '#1DB954';
+const tintColorDark = '#1DB954';
 
 export const Colors = {
   light: {
@@ -14,15 +23,15 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
-    link: '#0a7ea4',
+    link: '#1DB954',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#FFFFFF',
+    background: '#121212',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: '#B3B3B3',
+    tabIconDefault: '#B3B3B3',
     tabIconSelected: tintColorDark,
-    link: '#0a7ea4',
+    link: '#1DB954',
   },
 };

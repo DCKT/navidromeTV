@@ -11,15 +11,15 @@ export default function TabLayout() {
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Label>Home</Label>
-        <Icon sf="house" />
+        <Icon sf="house.fill" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="albums">
-        <Label>Albums</Label>
-        <Icon sf="square.stack" />
+        <Label>Library</Label>
+        <Icon sf="square.stack.fill" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <Label>Settings</Label>
-        <Icon sf="gear" />
+        <Icon sf="gearshape.fill" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
