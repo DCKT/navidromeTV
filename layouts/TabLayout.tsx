@@ -13,6 +13,10 @@ export default function TabLayout() {
         <Label>Home</Label>
         <Icon sf="house.fill" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="shuffle">
+        <Label>Shuffle</Label>
+        <Icon sf="shuffle" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="albums">
         <Label>Library</Label>
         <Icon sf="square.stack.fill" />

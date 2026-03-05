@@ -24,6 +24,7 @@ export function AudioPlayer() {
     previous,
     hasPrevious,
     hasNext,
+    shuffleMode,
   } = useAudio();
   const [source, setSource] = useState<AudioSource | null>(null);
   const player = useAudioPlayer(source);
@@ -138,14 +139,16 @@ export function AudioPlayer() {
           <Ionicons name="close-circle" size={44} color="#B3B3B3" />
         </Focusable>
 
-        <Focusable
-          onPress={previous}
-          style={tw`p-3`}
-          focusScale={1.2}
-          disabled={!hasPrevious}
-        >
-          <Ionicons name="play-skip-back" size={36} color="white" />
-        </Focusable>
+        {!shuffleMode && (
+          <Focusable
+            onPress={previous}
+            style={tw`p-3`}
+            focusScale={1.2}
+            disabled={!hasPrevious}
+          >
+            <Ionicons name="play-skip-back" size={36} color="white" />
+          </Focusable>
+        )}
 
         <Focusable
           onPress={togglePlayPause}
@@ -166,7 +169,11 @@ export function AudioPlayer() {
           focusScale={1.2}
           disabled={!hasNext}
         >
-          <Ionicons name="play-skip-forward" size={36} color="white" />
+          <Ionicons
+            name={shuffleMode ? "shuffle" : "play-skip-forward"}
+            size={36}
+            color="white"
+          />
         </Focusable>
       </View>
     </View>

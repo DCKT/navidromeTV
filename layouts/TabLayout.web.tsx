@@ -51,6 +51,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="shuffle"
+        options={{
+          title: 'Shuffle',
+          tabBarButton,
+          tabBarLabelStyle: textStyles.default,
+          tabBarIcon: () => null,
+        }}
+      />
+      <Tabs.Screen
         name="albums"
         options={{
           title: 'Library',

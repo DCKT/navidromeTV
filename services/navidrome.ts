@@ -68,6 +68,9 @@ export interface SubsonicResponse {
         album?: AlbumDetails;
         artist?: Artist;
         song?: Song;
+        randomSongs?: {
+            song: Song[];
+        };
     };
 }
 
@@ -205,6 +208,27 @@ class NavidromeClient {
         return data["subsonic-response"].artist;
     }
 
+    async getRandomSongs(size: number = 1): Promise<Song[]> {
+        const config = this.getConfig();
+        const authParams = this.generateAuthParams();
+        const queryParams = new URLSearchParams({
+            ...authParams,
+            size: size.toString(),
+        });
+
+        const response = await fetch(`${config.url}/rest/getRandomSongs?${queryParams.toString()}`);
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data: SubsonicResponse = await response.json();
+        if (data["subsonic-response"].status === 'failed') {
+            throw new Error(data["subsonic-response"].error?.message || 'Unknown Navidrome API error');
+        }
+
+        return data["subsonic-response"].randomSongs?.song || [];
+    }
+
     async getSong(id: string): Promise<Song> {
         const config = this.getConfig();
         const authParams = this.generateAuthParams();
@@ -239,4 +263,5 @@ export const getStreamUrl = (id: string) => navidrome.getStreamUrl(id);
 export const getCoverArtUrl = (id: string, size?: number) => navidrome.getCoverArtUrl(id, size);
 export const getAlbum = (id: string) => navidrome.getAlbum(id);
 export const getArtist = (id: string) => navidrome.getArtist(id);
+export const getRandomSongs = (size?: number) => navidrome.getRandomSongs(size);
 export const getSong = (id: string) => navidrome.getSong(id);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useRef, ReactNode, useCallback } from 'react';
 import { Song } from '@/services/navidrome';
 
 export type AudioState = 'stopped' | 'playing' | 'paused' | 'loading';
@@ -8,6 +8,7 @@ interface AudioContextType {
     queue: Song[];
     currentIndex: number;
     playerState: AudioState;
+    shuffleMode: boolean;
     hasPrevious: boolean;
     hasNext: boolean;
     play: (song: Song) => void;
@@ -18,6 +19,8 @@ interface AudioContextType {
     next: () => void;
     previous: () => void;
     setPlayerState: (state: AudioState) => void;
+    setShuffleMode: (enabled: boolean, onSkip?: () => void) => void;
+    triggerQueueEnd: () => boolean;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -26,13 +29,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const [queue, setQueue] = useState<Song[]>([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [playerState, setPlayerState] = useState<AudioState>('stopped');
+    const [shuffleMode, setShuffleModeState] = useState(false);
+    const onSkipRef = useRef<(() => void) | undefined>(undefined);
 
     const currentSong = currentIndex >= 0 && currentIndex < queue.length
         ? queue[currentIndex]
         : null;
 
     const hasPrevious = currentIndex > 0;
-    const hasNext = currentIndex < queue.length - 1;
+    const hasNext = shuffleMode || currentIndex < queue.length - 1;
 
     const play = useCallback((song: Song) => {
         setQueue([song]);
@@ -65,11 +70,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const next = useCallback(() => {
-        if (hasNext) {
+        if (shuffleMode && onSkipRef.current) {
+            onSkipRef.current();
+        } else if (currentIndex < queue.length - 1) {
             setCurrentIndex(i => i + 1);
             setPlayerState('playing');
         }
-    }, [hasNext]);
+    }, [shuffleMode, currentIndex, queue.length]);
 
     const previous = useCallback(() => {
         if (hasPrevious) {
@@ -78,12 +85,26 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         }
     }, [hasPrevious]);
 
+    const setShuffleMode = useCallback((enabled: boolean, onSkip?: () => void) => {
+        setShuffleModeState(enabled);
+        onSkipRef.current = onSkip;
+    }, []);
+
+    const triggerQueueEnd = useCallback(() => {
+        if (shuffleMode && onSkipRef.current) {
+            onSkipRef.current();
+            return true;
+        }
+        return false;
+    }, [shuffleMode]);
+
     return (
         <AudioContext.Provider value={{
             currentSong,
             queue,
             currentIndex,
             playerState,
+            shuffleMode,
             hasPrevious,
             hasNext,
             play,
@@ -94,6 +115,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
             next,
             previous,
             setPlayerState,
+            setShuffleMode,
+            triggerQueueEnd,
         }}>
             {children}
         </AudioContext.Provider>
