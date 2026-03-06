@@ -1,9 +1,4 @@
-import {
-  View,
-  ActivityIndicator,
-  Image,
-  BackHandler,
-} from "react-native";
+import { View, ActivityIndicator, Image, BackHandler } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { Focusable } from "./Focusable";
 import { useAudioPlayer, AudioSource, useAudioPlayerStatus } from "expo-audio";
@@ -92,7 +87,7 @@ export function AudioPlayer() {
     status.duration > 0 ? (status.currentTime / status.duration) * 100 : 0;
   const coverArtUrl = getCoverArtUrl(
     currentSong.coverArt || currentSong.id,
-    600
+    600,
   );
 
   const togglePlayPause = () => {
