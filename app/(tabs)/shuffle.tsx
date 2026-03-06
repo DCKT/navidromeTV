@@ -4,7 +4,7 @@ import { Focusable } from "@/components/Focusable";
 import { Ionicons } from "@expo/vector-icons";
 import { useAudio } from "@/context/AudioContext";
 import { getRandomSongs } from "@/services/navidrome";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import tw from "twrnc";
 
 export default function ShuffleScreen() {
@@ -13,7 +13,6 @@ export default function ShuffleScreen() {
 
   const playRandomSong = useCallback(async () => {
     setLoading(true);
-    setShuffleMode(true);
     try {
       const songs = await getRandomSongs(1);
       if (songs.length > 0) {
@@ -25,6 +24,16 @@ export default function ShuffleScreen() {
       setLoading(false);
     }
   }, [play]);
+
+  // We need a stable ref so the onSkip callback always calls the latest playRandomSong
+  const playRandomRef = useRef(playRandomSong);
+  playRandomRef.current = playRandomSong;
+
+  // Enable shuffle mode with skip callback on mount, disable on unmount
+  useEffect(() => {
+    setShuffleMode(true, () => playRandomRef.current());
+    return () => setShuffleMode(false, undefined);
+  }, [setShuffleMode]);
 
   return (
     <View style={tw`flex-1 bg-[#121212] items-center justify-center`}>

@@ -100,7 +100,9 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const setShuffleMode = useCallback(
     (enabled: boolean, onSkip?: () => void) => {
       setShuffleModeState(enabled);
-      onSkipRef.current = onSkip;
+      if (onSkip !== undefined) {
+        onSkipRef.current = onSkip;
+      }
     },
     [],
   );
