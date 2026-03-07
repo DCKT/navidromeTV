@@ -47,6 +47,7 @@
     },
     "newArchEnabled": true,
     "name": "navidromeTV",
-    "slug": "navidromeTV"
+    "slug": "navidromeTV",
+    "icon": "./assets/images/icon.png"
   }
 }
